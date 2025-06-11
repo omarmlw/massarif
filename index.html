@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تتبع المصاريف</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1976d2;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .summary {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .list {
+      margin-top: 10px;
+    }
+    .item {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>تتبع المصاريف</h1>
+
+    <div class="summary">
+      <p>💰 الدخل: <span id="total-income">0</span> دج</p>
+      <p>💸 المصاريف: <span id="total-expense">0</span> دج</p>
+      <p>📊 الرصيد: <span id="balance">0</span> دج</p>
+    </div>
+
+    <input type="text" id="desc" placeholder="الوصف (مثال: أكل)" />
+    <input type="number" id="amount" placeholder="المبلغ (دج)" />
+    <select id="type">
+      <option value="income">دخل</option>
+      <option value="expense">مصروف</option>
+    </select>
+    <button onclick="addTransaction()">إضافة</button>
+
+    <div class="list" id="transaction-list"></div>
+  </div>
+
+  <script>
+    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+    function addTransaction() {
+      const desc = document.getElementById("desc").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const type = document.getElementById("type").value;
+
+      if (!desc || isNaN(amount)) return alert("يرجى إدخال وصف ومبلغ صالح");
+
+      transactions.push({ desc, amount, type });
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+      renderTransactions();
+    }
+
+    function renderTransactions() {
+      const list = document.getElementById("transaction-list");
+      const income = transactions.filter(t => t.type === "income").reduce((acc, t) => acc + t.amount, 0);
+      const expense = transactions.filter(t => t.type === "expense").reduce((acc, t) => acc + t.amount, 0);
+      const balance = income - expense;
+
+      document.getElementById("total-income").textContent = income;
+      document.getElementById("total-expense").textContent = expense;
+      document.getElementById("balance").textContent = balance;
+
+      list.innerHTML = "";
+      transactions.forEach(t => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.textContent = `${t.type === "income" ? '➕' : '➖'} ${t.desc}: ${t.amount} دج`;
+        list.appendChild(div);
+      });
+    }
+
+    renderTransactions();
+  </script>
+</body>
+</html>
